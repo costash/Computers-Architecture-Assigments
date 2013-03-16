@@ -23,8 +23,8 @@ from checker import Checker
 from node import Node
 from datastore import DataStore
 
-#DEBUG = True
-DEBUG = False
+DEBUG = True
+#DEBUG = False
 
 
 class Tester:   
@@ -42,7 +42,7 @@ class Tester:
         self.test_generator = TestGenerator()    
         
         self.print_lock = Lock()
-        self.failed = Event()
+        self.passed = Event()
         self.passed_tests = 0
         self.finished_output_lock = Lock()
         self.finished_output = False       
@@ -81,7 +81,10 @@ class Tester:
     def timer_fn(self, test, num_times):
         with self.finished_output_lock:
             if not self.finished_output:
-                msg = "Test %-10s Timeout..................................%d%% completed"%(test.name, 100.0*self.passed_tests/num_times)
+                if self.passed_tests == num_times:
+                    msg = "Test %-10s Finished..................................%d%% completed"%(test.name, 100.0*self.passed_tests/num_times)
+                else:
+                    msg = "Test %-10s Timeout..................................%d%% completed"%(test.name, 100.0*self.passed_tests/num_times)
                 self.safe_print(msg)
                 out_file = open(self.output_filename, "a")
                 out_file.write(msg + "\n")
@@ -163,7 +166,7 @@ class Tester:
         for error in errors:
             self.print_error(error)
 
-        if not len(errors) and not self.failed.is_set():
+        if not len(errors) and self.passed.is_set():
             self.passed_tests += 1
             self.safe_print("Correct result")
         
@@ -184,9 +187,11 @@ class Tester:
         result = node.compute_matrix_block(task[1], task[2], task[3], task[4])
         
         err = self.check_result(result, test.matrix1, test.matrix2, task)            
+
         if err:
             self.print_error(err)
-            self.failed.set()
+        else:
+            self.passed.set()
             
     def check_result(self, result_block, matrix1, matrix2, task):
         """
@@ -202,6 +207,9 @@ class Tester:
         """
 
         error_message = ""
+
+        if not result_block:
+            error_message = "No result matrix block"
 
         # compute correct result for matrix multipliction
 

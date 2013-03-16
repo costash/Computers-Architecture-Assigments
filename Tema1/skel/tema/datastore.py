@@ -89,7 +89,6 @@ class DataStore:
 
             @return: the maximum number of in-flight requests supported by this data store
         """
-        self.__check_access(node)
 
         return self.max_pending_requests
 
