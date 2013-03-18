@@ -66,7 +66,7 @@ class DataStore:
 
     def register_thread(self, node):
         """
-            Registers the current thread of the given node to the data store.
+            Registers the current thread of the given node to the data store. The current thread is determined automatically with threading.current_thread(). This thread will be associated with the node given as an argument and registered to the datastore. The thread will then be able to query the datastore. Multiple threads (logically owned by node) can call this method and register to the datastore.
 
             @param node: the node owning the data store
         """

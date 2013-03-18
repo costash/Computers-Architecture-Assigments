@@ -14,6 +14,7 @@ from time import sleep
 from Queue import Queue
 
 DEBUG = True
+print_lock = Lock()
 
 class Node:
     """
@@ -44,6 +45,12 @@ class Node:
         self.max_pending_req = self.data_store.get_max_pending_requests(self.node_ID)
         # Queue for DataStore connections
         self.data_store_queue = Queue(self.max_pending_req)
+
+        self.condition = Condition()    # Condition for colaboration with threads
+        self.not_finished_all = True
+
+        self.wait_thread = Thread(target = self.__wait_request)
+        self.wait_thread.start()
 
     def set_nodes(self, nodes):
         """
@@ -90,7 +97,11 @@ class Node:
         """
         self.data_store.register_thread(self.node_ID)
 
-        
+        for i in xrange(start_row, start_row + num_rows):
+            for j in xrange(start_column, start_column + num_columns):
+                for k in xrange(self.matrix_size):
+                    a, b = self.obtain_elements(i, j, k)
+                    matrix_block[i - start_row][j - start_row] += a * b
         
         #with self.print_lock:
         #    if DEBUG:
@@ -100,13 +111,35 @@ class Node:
         for i in xrange(n):
             row = []
             for j in xrange(n):
-                row.append(self.data_store.get_element_from_a(self.node_ID, i, j))
+                row.append(self.data_store.get_element_from_a(self, i, j))
             block1.append(row)
         with dbg_lock:#self.print_lock:
             print "Node %s blockA is"%(str(self.node_ID))
-            self.__mprint(block1)"""
+            self.mprint(block1)"""
 
-    def __mprint(self, matrix):
+    def obtain_elements(self, i, j, k):
+        """
+            Gets elements A[i][k] and B[k][j] from matrices to be multiplied
+            
+            @param i: index for line of matrix A
+            @param j: index for column of matrix B
+            @param k: index for line/column of both matrices
+            
+            @return: a tuple (a, b) where a contains A[i][k] and b contains
+                B[k][j]
+        """
+        if (i >= self.node_ID[0] * self.block_size and
+            i < (self.node_ID[0] + 1) * self.block_size and
+            j >= self.node_ID[1] * self.block_size and
+            j < (self.node_ID[1] + 1) * self.block_size):
+            pass
+        self.data_store_queue.put((i,j), True)
+        with print_lock:
+            if DEBUG:
+                print self.node_ID, " entered ", (i, j), " in queue"
+        return (0, 0)
+
+    def mprint(self, matrix):
         n = len(matrix)
         for i in range(n):
             for j in range(len(matrix[i])):
@@ -120,6 +153,31 @@ class Node:
             Instructs the node to shutdown (terminate all threads).
         """
         for thread in self.node_threads:
-            thread.join
+            thread.join()
+        self.data_store_queue.put(None)
+        self.wait_thread.join()
+        with print_lock:
+            if DEBUG:
+                print self.node_ID, " joined all threads"
 
+    def __wait_request(self):
+        """
+            Waits for requests from another Nodes
+        """
+        while True:
+            request = self.data_store_queue.get(True)
+            if request == None:
+                self.data_store_queue.put(None, True)
+                return
+            self.__process_request(request)
+            self.data_store_queue.task_done()
 
+    def __process_request(self, request):
+        """
+            Processes a request
+            
+            @type request: tuple representing (node_ID, reference to response which is
+                a list)
+            @param request: The request to be processed
+        """
+        pass

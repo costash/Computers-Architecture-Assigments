@@ -23,8 +23,8 @@ from checker import Checker
 from node import Node
 from datastore import DataStore
 
-DEBUG = True
-#DEBUG = False
+#DEBUG = True
+DEBUG = False
 
 
 class Tester:   
@@ -159,8 +159,12 @@ class Tester:
         for t in threads:
             t.join()
 
+        print "Before shutdwn"
         for node in nodes:
             node.shutdown()
+            print node.node_ID
+        print "After shutdwn"
+        
         
         errors = checker.status()
         for error in errors:
