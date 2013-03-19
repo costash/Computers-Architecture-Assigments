@@ -13,13 +13,16 @@ from threading import *
 from time import sleep
 from Queue import Queue
 
-DEBUG = True
+#DEBUG = True
+DEBUG = False
 print_lock = Lock()
 
 class Node:
     """
         Class that represents a cluster node with computation and storage functionalities.
     """
+    MAT_A = True
+    MAT_B = False
 
     def __init__(self, node_ID, block_size, matrix_size, data_store):
         """
@@ -37,6 +40,7 @@ class Node:
         self.data_store = data_store
 
         self.nodes = []             # Nodes connected to
+        self.nodes_mat = None
         self.node_lock = Lock()
         self.node_threads = set()   # Threads for this Node
         self.print_lock = Lock()
@@ -61,6 +65,10 @@ class Node:
         """
         with self.node_lock:
             self.nodes = nodes
+            n = self.matrix_size / self.block_size
+            self.nodes_mat = [[0 for i in xrange(n)] for j in xrange(n)]
+            for node in self.nodes:
+                self.nodes_mat[node.node_ID[0]][node.node_ID[1]] = node
 
     def compute_matrix_block(self, start_row, start_column, num_rows, num_columns):
         """
@@ -74,11 +82,12 @@ class Node:
 
             @return: the block of the result matrix encoded as a row-order list of lists of integers
         """
-        matrix_block = [[0 for i in range(num_columns)] for j in range(num_rows)]
+        matrix_block = [[0 for i in xrange(num_columns)] for j in xrange(num_rows)]
         t = Thread(target = self.__main_work, args = (start_row,
                                 start_column, num_rows, num_columns, matrix_block))
         t.start()
 
+        t.join()
         self.node_threads.add(t)
 
         return matrix_block
@@ -95,49 +104,58 @@ class Node:
 
             @param matrix_block: the block of the result matrix encoded as a row-order list of lists of integers
         """
-        self.data_store.register_thread(self.node_ID)
+        #self.data_store.register_thread(self.node_ID)
+
+        mat_a = [[0 for i in xrange(self.matrix_size)] for j in xrange(self.matrix_size)]
+        mat_b = [[0 for i in xrange(self.matrix_size)] for j in xrange(self.matrix_size)]
+        mat = {self.MAT_A: mat_a, self.MAT_B: mat_b}
+        with print_lock:
+            if DEBUG:
+                self.mprint(mat[self.MAT_A])
+        receive_queue = Queue()
+
+        # Number of requests to be sent
+        num_requests = self.matrix_size * (num_rows + num_columns)
+
+        for k in xrange(self.matrix_size):
+            for i in xrange(start_row, start_row + num_rows):
+                # Create a request for elements from A
+                node = self.nodes_mat[i / self.block_size][k / self.block_size]
+                
+                node.data_store_queue.put([receive_queue, self.MAT_A, 
+                    i % self.block_size, k % self.block_size, self.block_size,
+                    i, k])
+            for j in xrange(start_column, start_column + num_columns):
+                # Create a request for elements from B
+                node = self.nodes_mat[k / self.block_size][j / self.block_size]
+                node.data_store_queue.put([receive_queue, self.MAT_B,
+                    k % self.block_size, j % self.block_size, self.block_size,
+                    k, j])
+
+        while (num_requests > 0):
+            response = receive_queue.get()
+            if DEBUG:
+                with print_lock:
+                    print '[', response[5], ',', response[6], ']'
+            mat[response[0]][response[5]][response[6]] = response[3]
+            num_requests -= 1
+            
+        """with print_lock:
+            print 'MAT_A'
+            self.mprint(mat_a)
+            print 'MAT_B'
+            self.mprint(mat_b)"""
 
         for i in xrange(start_row, start_row + num_rows):
             for j in xrange(start_column, start_column + num_columns):
                 for k in xrange(self.matrix_size):
-                    a, b = self.obtain_elements(i, j, k)
-                    matrix_block[i - start_row][j - start_row] += a * b
+                    a, b = (mat_a[i][k], mat_b[k][j])
+                    matrix_block[i - start_row][j - start_column] += a * b
         
-        #with self.print_lock:
-        #    if DEBUG:
-        #        print "%s data_store_max_req: %d"%(self.node_ID, max_pending_req)
-        """n = self.block_size
-        block1 = []
-        for i in xrange(n):
-            row = []
-            for j in xrange(n):
-                row.append(self.data_store.get_element_from_a(self, i, j))
-            block1.append(row)
-        with dbg_lock:#self.print_lock:
-            print "Node %s blockA is"%(str(self.node_ID))
-            self.mprint(block1)"""
-
-    def obtain_elements(self, i, j, k):
-        """
-            Gets elements A[i][k] and B[k][j] from matrices to be multiplied
-            
-            @param i: index for line of matrix A
-            @param j: index for column of matrix B
-            @param k: index for line/column of both matrices
-            
-            @return: a tuple (a, b) where a contains A[i][k] and b contains
-                B[k][j]
-        """
-        if (i >= self.node_ID[0] * self.block_size and
-            i < (self.node_ID[0] + 1) * self.block_size and
-            j >= self.node_ID[1] * self.block_size and
-            j < (self.node_ID[1] + 1) * self.block_size):
-            pass
-        self.data_store_queue.put((i,j), True)
-        with print_lock:
-            if DEBUG:
-                print self.node_ID, " entered ", (i, j), " in queue"
-        return (0, 0)
+        """with print_lock:
+            print 'matrix_block'
+            self.mprint(matrix_block)"""
+        
 
     def mprint(self, matrix):
         n = len(matrix)
@@ -153,9 +171,11 @@ class Node:
             Instructs the node to shutdown (terminate all threads).
         """
         for thread in self.node_threads:
-            thread.join()
+            #thread.join()
+            del thread
         self.data_store_queue.put(None)
         self.wait_thread.join()
+        del self.wait_thread
         with print_lock:
             if DEBUG:
                 print self.node_ID, " joined all threads"
@@ -164,10 +184,11 @@ class Node:
         """
             Waits for requests from another Nodes
         """
+        self.data_store.register_thread(self.node_ID)
         while True:
-            request = self.data_store_queue.get(True)
+            request = self.data_store_queue.get()
             if request == None:
-                self.data_store_queue.put(None, True)
+                self.data_store_queue.put(None)
                 return
             self.__process_request(request)
             self.data_store_queue.task_done()
@@ -180,4 +201,21 @@ class Node:
                 a list)
             @param request: The request to be processed
         """
-        pass
+        # Request contains: request[0] - Queue where to place the response
+        #   request[1] - Bool for matrix selection
+        #   request[2] - Lines index in the block
+        #   request[3] - Columns index in the block
+        #   request[4] - Block size
+        #   request[5] - Lines index in the full matrix
+        #   request[6] - Columns index in the full matrix
+        queue = request[0]
+        result = 0
+        if request[1] == self.MAT_A:
+            with print_lock:
+                if DEBUG:
+                    print request[2], request[3]
+            result = self.data_store.get_element_from_a(self.node_ID, request[2], request[3])
+        elif request[1] == self.MAT_B:
+            result = self.data_store.get_element_from_b(self.node_ID, request[2], request[3])
+
+        queue.put([request[1], request[2], request[3], result, request[4], request[5], request[6]])
