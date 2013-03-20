@@ -40,19 +40,15 @@ class Node:
         self.data_store = data_store
 
         self.nodes = []             # Nodes connected to
-        self.nodes_mat = None
+        self.nodes_mat = None       # Nodes saved in a matrix
         self.node_lock = Lock()
-        self.node_threads = set()   # Threads for this Node
-        self.print_lock = Lock()
 
         # Number of max pending requests
         self.max_pending_req = self.data_store.get_max_pending_requests(self.node_ID)
         # Queue for DataStore connections
         self.data_store_queue = Queue(self.max_pending_req)
 
-        self.condition = Condition()    # Condition for colaboration with threads
-        self.not_finished_all = True
-
+        # Thread for connections to Data Store
         self.wait_thread = Thread(target = self.__wait_request)
         self.wait_thread.start()
 
@@ -83,29 +79,8 @@ class Node:
             @return: the block of the result matrix encoded as a row-order list of lists of integers
         """
         matrix_block = [[0 for i in xrange(num_columns)] for j in xrange(num_rows)]
-        t = Thread(target = self.__main_work, args = (start_row,
-                                start_column, num_rows, num_columns, matrix_block))
-        t.start()
 
-        t.join()
-        self.node_threads.add(t)
-
-        return matrix_block
-
-    def __main_work(self, start_row, start_column, num_rows, num_columns, matrix_block):
-        """
-            Computes a given block of the result matrix.
-            Makes the necessary communication between Nodes
-
-            @param start_row: the index of the first row in the block
-            @param start_column: the index of the first column in the block
-            @param num_rows: number of rows in the block
-            @param num_columns: number of columns in the block
-
-            @param matrix_block: the block of the result matrix encoded as a row-order list of lists of integers
-        """
-        #self.data_store.register_thread(self.node_ID)
-
+        # Get all necessary pieces from both matrices to make the product
         mat_a = [[0 for i in xrange(self.matrix_size)] for j in xrange(self.matrix_size)]
         mat_b = [[0 for i in xrange(self.matrix_size)] for j in xrange(self.matrix_size)]
         mat = {self.MAT_A: mat_a, self.MAT_B: mat_b}
@@ -117,6 +92,13 @@ class Node:
         # Number of requests to be sent
         num_requests = self.matrix_size * (num_rows + num_columns)
 
+        # Create all requests and temporarily store them
+        # A requests consists from a list of elements:
+        #   First - Reference to the queue for receiving requested data
+        #   Second - Matrix selector
+        #   Fourth and fifth - Line and column index of the corresponding node
+        #   Sixth - The block size
+        #   Seventh and eighth - Line and column index in the whole matrix
         for k in xrange(self.matrix_size):
             for i in xrange(start_row, start_row + num_rows):
                 # Create a request for elements from A
@@ -132,6 +114,7 @@ class Node:
                     k % self.block_size, j % self.block_size, self.block_size,
                     k, j])
 
+        # Wait for requests responses and store them for this task accordingly
         while (num_requests > 0):
             response = receive_queue.get()
             if DEBUG:
@@ -139,25 +122,22 @@ class Node:
                     print '[', response[5], ',', response[6], ']'
             mat[response[0]][response[5]][response[6]] = response[3]
             num_requests -= 1
-            
-        """with print_lock:
-            print 'MAT_A'
-            self.mprint(mat_a)
-            print 'MAT_B'
-            self.mprint(mat_b)"""
 
+        # Make the actual matrix multiplication for the requested block
         for i in xrange(start_row, start_row + num_rows):
             for j in xrange(start_column, start_column + num_columns):
                 for k in xrange(self.matrix_size):
                     a, b = (mat_a[i][k], mat_b[k][j])
                     matrix_block[i - start_row][j - start_column] += a * b
         
-        """with print_lock:
-            print 'matrix_block'
-            self.mprint(matrix_block)"""
-        
+        return matrix_block
 
     def mprint(self, matrix):
+        """
+            Prints a matrix hold as a row-major list of lists
+
+            @param matrix: The matrix to be printed
+        """
         n = len(matrix)
         for i in range(n):
             for j in range(len(matrix[i])):
@@ -170,9 +150,6 @@ class Node:
         """
             Instructs the node to shutdown (terminate all threads).
         """
-        for thread in self.node_threads:
-            #thread.join()
-            del thread
         self.data_store_queue.put(None)
         self.wait_thread.join()
         del self.wait_thread
@@ -187,6 +164,8 @@ class Node:
         self.data_store.register_thread(self.node_ID)
         while True:
             request = self.data_store_queue.get()
+            
+            # When no new request is about to come, exit from the thread
             if request == None:
                 self.data_store_queue.put(None)
                 return
@@ -197,17 +176,16 @@ class Node:
         """
             Processes a request
             
-            @type request: tuple representing (node_ID, reference to response which is
-                a list)
+            @type request: a list of parameters
             @param request: The request to be processed
+            Request contains: request[0] - Queue where to place the response
+            request[1] - Bool for matrix selection
+            request[2] - Lines index in the block
+            request[3] - Columns index in the block
+            request[4] - Block size
+            request[5] - Lines index in the full matrix
+            request[6] - Columns index in the full matrix
         """
-        # Request contains: request[0] - Queue where to place the response
-        #   request[1] - Bool for matrix selection
-        #   request[2] - Lines index in the block
-        #   request[3] - Columns index in the block
-        #   request[4] - Block size
-        #   request[5] - Lines index in the full matrix
-        #   request[6] - Columns index in the full matrix
         queue = request[0]
         result = 0
         if request[1] == self.MAT_A:
@@ -219,3 +197,28 @@ class Node:
             result = self.data_store.get_element_from_b(self.node_ID, request[2], request[3])
 
         queue.put([request[1], request[2], request[3], result, request[4], request[5], request[6]])
+
+class Request:
+    """
+        This class defines a request that will be sent from a Node to another
+        Node for obtaining elements from Data Store
+    """
+    def __init__(self, queue, selector, node_identifier, block_size, matrix_identifier):
+        """
+            Constructor
+            @type queue: A blocking queue of type Queue.Queue
+            @param queue: The queue where to put the response for this request
+            @type selector: Boolean
+            @param selector: Selects the matrix from which to get the element
+            @type node_identifier: Tuple of two integers (i, j)
+            @param node_identifier: Identifies the node in the matrix of nodes
+            @type block_size: Integer
+            @param block_size: The block_size of a Data Store
+            @type matrix_identifier: Tuple of two integers (i, j)
+            @param matrix_identifier: Identifies the position in the matrix of elements
+        """
+        self.queue = queue
+        self.selector = selector
+        self.node_identifier = node_identifier
+        self.block_size = block_size
+        self.matrix_identifier = matrix_identifier
