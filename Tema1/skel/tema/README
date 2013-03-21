@@ -1,0 +1,32 @@
+*** Computer Systems Architecture course ***
+*** Assignment 1 - Cluster Activity Simulation ***
+*** March 2013 ***
+*** Constantin Serban-Radoi 333CA ***
+
+** Introduction **
+        This assignment's purpose is to simulate a Cluster. The FEP part was
+    already given to us, and we had to implement a computational Node.
+        The assignment meant to implement a Node that was computing blocks of
+    the result of two matrices that are to be multiplied.
+
+** Implementation **
+        Each Node holds a reference to the others, thus meaning we have a full
+    mesh configuration. Also, for easier access, I held a reference to nodes in
+    a square matrix.
+
+        For communication between Nodes I used a Queue for requests on each node
+    and I used a thread that waits requests and processes them. After a request
+    is processed (the element from data store is received), it is pushed in the
+    requester's receive_queue as a response.
+        After all requests have got the response in a task, then the
+    multiplication for the block is made, and the result is returned.
+
+** Testing **
+        I have tested with the given run_test.sh on a 32-bit Linux Operating
+    System, and got times between 3 and 4 minutes. (I have to mention that the
+    testing was done on a Virtual Machine).
+        I have also tested with the given run_test.bat on a 64-bit Windows 7
+    and the times were around 1 minute.
+        The machine uses a Quad core Intel i7-2630QM processor.
+
+        On FEP I have times around 1 minute and 30 seconds.
