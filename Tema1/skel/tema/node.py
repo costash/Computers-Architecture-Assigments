@@ -93,34 +93,31 @@ class Node:
         num_requests = self.matrix_size * (num_rows + num_columns)
 
         # Create all requests and temporarily store them
-        # A requests consists from a list of elements:
-        #   First - Reference to the queue for receiving requested data
-        #   Second - Matrix selector
-        #   Fourth and fifth - Line and column index of the corresponding node
-        #   Sixth - The block size
-        #   Seventh and eighth - Line and column index in the whole matrix
         for k in xrange(self.matrix_size):
             for i in xrange(start_row, start_row + num_rows):
                 # Create a request for elements from A
                 node = self.nodes_mat[i / self.block_size][k / self.block_size]
-                
-                node.data_store_queue.put([receive_queue, self.MAT_A, 
-                    i % self.block_size, k % self.block_size, self.block_size,
-                    i, k])
+                request = Request(receive_queue, self.MAT_A, (i % self.block_size,
+                    k % self.block_size), self.block_size, (i, k))
+
+                node.data_store_queue.put(request)
             for j in xrange(start_column, start_column + num_columns):
                 # Create a request for elements from B
                 node = self.nodes_mat[k / self.block_size][j / self.block_size]
-                node.data_store_queue.put([receive_queue, self.MAT_B,
-                    k % self.block_size, j % self.block_size, self.block_size,
-                    k, j])
+                request = Request(receive_queue, self.MAT_B, (k % self.block_size,
+                    j % self.block_size), self.block_size, (k, j))
+    
+                node.data_store_queue.put(request)
 
         # Wait for requests responses and store them for this task accordingly
         while (num_requests > 0):
             response = receive_queue.get()
             if DEBUG:
                 with print_lock:
-                    print '[', response[5], ',', response[6], ']'
-            mat[response[0]][response[5]][response[6]] = response[3]
+                    print "mat id", response.matrix_identifier
+            i = response.matrix_identifier[0]
+            j = response.matrix_identifier[1]
+            mat[response.selector][i][j] = response.result
             num_requests -= 1
 
         # Make the actual matrix multiplication for the requested block
@@ -139,8 +136,8 @@ class Node:
             @param matrix: The matrix to be printed
         """
         n = len(matrix)
-        for i in range(n):
-            for j in range(len(matrix[i])):
+        for i in xrange(n):
+            for j in xrange(len(matrix[i])):
                 print matrix[i][j]," ",
             print
 
@@ -150,6 +147,7 @@ class Node:
         """
             Instructs the node to shutdown (terminate all threads).
         """
+        # Inform the wait_thread that it must exit
         self.data_store_queue.put(None)
         self.wait_thread.join()
         del self.wait_thread
@@ -176,27 +174,24 @@ class Node:
         """
             Processes a request
             
-            @type request: a list of parameters
+            @type request: a Request
             @param request: The request to be processed
-            Request contains: request[0] - Queue where to place the response
-            request[1] - Bool for matrix selection
-            request[2] - Lines index in the block
-            request[3] - Columns index in the block
-            request[4] - Block size
-            request[5] - Lines index in the full matrix
-            request[6] - Columns index in the full matrix
         """
-        queue = request[0]
+        queue = request.queue
         result = 0
-        if request[1] == self.MAT_A:
+        if request.selector == self.MAT_A:
             with print_lock:
                 if DEBUG:
-                    print request[2], request[3]
-            result = self.data_store.get_element_from_a(self.node_ID, request[2], request[3])
-        elif request[1] == self.MAT_B:
-            result = self.data_store.get_element_from_b(self.node_ID, request[2], request[3])
+                    print request.node_identifier
+            result = self.data_store.get_element_from_a(self.node_ID,
+                request.node_identifier[0], request.node_identifier[1])
+        elif request.selector == self.MAT_B:
+            result = self.data_store.get_element_from_b(self.node_ID,
+                request.node_identifier[0], request.node_identifier[1])
 
-        queue.put([request[1], request[2], request[3], result, request[4], request[5], request[6]])
+        # Put the response in the requester's receive_queue
+        response = Response(request.selector, request.matrix_identifier, result)
+        queue.put(response)
 
 class Request:
     """
@@ -222,3 +217,20 @@ class Request:
         self.node_identifier = node_identifier
         self.block_size = block_size
         self.matrix_identifier = matrix_identifier
+
+class Response:
+    """
+        This class defines a response for a request
+    """
+    def __init__(self, selector, matrix_identifier, result):
+        """
+            Constructor
+            @type selector: Boolean
+            @param selector: Selects the matrix from which to get the element
+            @type matrix_identifier: Tuple of two integers (i, j)
+            @param matrix_identifier: Identifies the position in the matrix of elements
+            @param result: The element that was requested
+        """
+        self.selector = selector
+        self.matrix_identifier = matrix_identifier
+        self.result = result
