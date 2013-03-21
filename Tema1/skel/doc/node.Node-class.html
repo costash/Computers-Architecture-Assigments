@@ -138,56 +138,15 @@
       
     </td>
   </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="node.Node-class.html#__main_work" class="summary-sig-name" onclick="show_private();">__main_work</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">start_row</span>,
-        <span class="summary-sig-arg">start_column</span>,
-        <span class="summary-sig-arg">num_rows</span>,
-        <span class="summary-sig-arg">num_columns</span>,
-        <span class="summary-sig-arg">matrix_block</span>)</span><br />
-      Computes a given block of the result matrix.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="node-pysrc.html#Node.__main_work">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="node.Node-class.html#obtain_elements" class="summary-sig-name">obtain_elements</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">i</span>,
-        <span class="summary-sig-arg">j</span>,
-        <span class="summary-sig-arg">k</span>)</span><br />
-      Gets elements A[i][k] and B[k][j] from matrices to be multiplied</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="node-pysrc.html#Node.obtain_elements">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="mprint"></a><span class="summary-sig-name">mprint</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">matrix</span>)</span></td>
+          <td><span class="summary-sig"><a href="node.Node-class.html#mprint" class="summary-sig-name">mprint</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">matrix</span>)</span><br />
+      Prints a matrix hold as a row-major list of lists</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="node-pysrc.html#Node.mprint">source&nbsp;code</a></span>
             
@@ -247,6 +206,38 @@
         </tr>
       </table>
       
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="MAT_A"></a><span class="summary-name">MAT_A</span> = <code title="True">True</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="MAT_B"></a><span class="summary-name">MAT_B</span> = <code title="False">False</code>
     </td>
   </tr>
 </table>
@@ -359,67 +350,27 @@
   </dl>
 </td></tr></table>
 </div>
-<a name="__main_work"></a>
-<div class="private">
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__main_work</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">start_row</span>,
-        <span class="sig-arg">start_column</span>,
-        <span class="sig-arg">num_rows</span>,
-        <span class="sig-arg">num_columns</span>,
-        <span class="sig-arg">matrix_block</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="node-pysrc.html#Node.__main_work">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Computes a given block of the result matrix. Makes the necessary 
-  communication between Nodes</p>
-  <dl class="fields">
-    <dt>Parameters:</dt>
-    <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>start_row</code></strong> - the index of the first row in the block</li>
-        <li><strong class="pname"><code>start_column</code></strong> - the index of the first column in the block</li>
-        <li><strong class="pname"><code>num_rows</code></strong> - number of rows in the block</li>
-        <li><strong class="pname"><code>num_columns</code></strong> - number of columns in the block</li>
-        <li><strong class="pname"><code>matrix_block</code></strong> - the block of the result matrix encoded as a row-order list of 
-          lists of integers</li>
-    </ul></dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="obtain_elements"></a>
+<a name="mprint"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">obtain_elements</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">i</span>,
-        <span class="sig-arg">j</span>,
-        <span class="sig-arg">k</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">mprint</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">matrix</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="node-pysrc.html#Node.obtain_elements">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="node-pysrc.html#Node.mprint">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>Gets elements A[i][k] and B[k][j] from matrices to be multiplied</p>
+  <p>Prints a matrix hold as a row-major list of lists</p>
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>i</code></strong> - index for line of matrix A</li>
-        <li><strong class="pname"><code>j</code></strong> - index for column of matrix B</li>
-        <li><strong class="pname"><code>k</code></strong> - index for line/column of both matrices</li>
+        <li><strong class="pname"><code>matrix</code></strong> - The matrix to be printed</li>
     </ul></dd>
-    <dt>Returns:</dt>
-        <dd>a tuple (a, b) where a contains A[i][k] and b contains B[k][j]</dd>
   </dl>
 </td></tr></table>
 </div>
@@ -442,8 +393,7 @@
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>request</code></strong> (tuple representing (node_ID, reference to response which is a 
-          list)) - The request to be processed</li>
+        <li><strong class="pname"><code>request</code></strong> (a Request) - The request to be processed</li>
     </ul></dd>
   </dl>
 </td></tr></table>
@@ -477,7 +427,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Tue Mar 19 00:03:48 2013
+    Generated by Epydoc 3.0.1 on Thu Mar 21 11:28:45 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>tester</title>
+  <title>node.Request</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -39,7 +39,8 @@
   <tr valign="top">
     <td width="100%">
       <span class="breadcrumbs">
-        Module&nbsp;tester
+        <a href="node-module.html">Module&nbsp;node</a> ::
+        Class&nbsp;Request
       </span>
     </td>
     <td>
@@ -49,75 +50,28 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="tester-module.html"
+            >]&nbsp;|&nbsp;<a href="node.Request-class.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
-<!-- ==================== MODULE DESCRIPTION ==================== -->
-<h1 class="epydoc">Module tester</h1><p class="nomargin-top"><span class="codelink"><a href="tester-pysrc.html">source&nbsp;code</a></span></p>
-<p>Testing infrastructure - generates and executes tests, simulates a 
-  cluster's FEPs (front-end processors)</p>
-  <p>Computer Systems Architecture course Assignment 1 - Cluster Activity 
-  Simulation march 2013</p>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class Request</h1><p class="nomargin-top"><span class="codelink"><a href="node-pysrc.html#Request">source&nbsp;code</a></span></p>
+<p>This class defines a request that will be sent from a Node to another 
+  Node for obtaining elements from Data Store</p>
 
-<!-- ==================== CLASSES ==================== -->
-<a name="section-Classes"></a>
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Classes</span></td>
+        <td align="left"><span class="table-header">Instance Methods</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-Classes"
-         class="privatelink" onclick="toggle_private();"
-         >hide private</a>]</span></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="tester.Tester-class.html" class="summary-name">Tester</a><br />
-      Generates test scenarios and simulates the users and 
-        front-end-processors of a cluster, which send jobs to the 
-        computational and storage nodes.
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="tester.Test-class.html" class="summary-name">Test</a><br />
-      Represents a test
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="tester.TestGenerator-class.html" class="summary-name">TestGenerator</a><br />
-      Randomly generates tests, tests are composed of a matrix, a number 
-        of nodes and a number of tasks.
-    </td>
-  </tr>
-</table>
-<!-- ==================== FUNCTIONS ==================== -->
-<a name="section-Functions"></a>
-<table class="summary" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td colspan="2" class="table-header">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr valign="top">
-        <td align="left"><span class="table-header">Functions</span></td>
-        <td align="right" valign="top"
-         ><span class="options">[<a href="#section-Functions"
+         ><span class="options">[<a href="#section-InstanceMethods"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
@@ -130,9 +84,15 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="usage"></a><span class="summary-sig-name">usage</span>(<span class="summary-sig-arg">argv</span>)</span></td>
+          <td><span class="summary-sig"><a href="node.Request-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">queue</span>,
+        <span class="summary-sig-arg">selector</span>,
+        <span class="summary-sig-arg">node_identifier</span>,
+        <span class="summary-sig-arg">block_size</span>,
+        <span class="summary-sig-arg">matrix_identifier</span>)</span><br />
+      Constructor</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="tester-pysrc.html#usage">source&nbsp;code</a></span>
+            <span class="codelink"><a href="node-pysrc.html#Request.__init__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -141,38 +101,58 @@
     </td>
   </tr>
 </table>
-<!-- ==================== VARIABLES ==================== -->
-<a name="section-Variables"></a>
-<table class="summary" border="1" cellpadding="3"
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Variables</span></td>
+        <td align="left"><span class="table-header">Method Details</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-Variables"
+         ><span class="options">[<a href="#section-MethodDetails"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
     </table>
   </td>
 </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="DEBUG"></a><span class="summary-name">DEBUG</span> = <code title="False">False</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="__package__"></a><span class="summary-name">__package__</span> = <code title="None">None</code>
-    </td>
-  </tr>
 </table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">queue</span>,
+        <span class="sig-arg">selector</span>,
+        <span class="sig-arg">node_identifier</span>,
+        <span class="sig-arg">block_size</span>,
+        <span class="sig-arg">matrix_identifier</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="node-pysrc.html#Request.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Constructor</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>queue</code></strong> (A blocking queue of type Queue.Queue) - The queue where to put the response for this request</li>
+        <li><strong class="pname"><code>selector</code></strong> (Boolean) - Selects the matrix from which to get the element</li>
+        <li><strong class="pname"><code>node_identifier</code></strong> (Tuple of two integers (i, j)) - Identifies the node in the matrix of nodes</li>
+        <li><strong class="pname"><code>block_size</code></strong> (Integer) - The block_size of a Data Store</li>
+        <li><strong class="pname"><code>matrix_identifier</code></strong> (Tuple of two integers (i, j)) - Identifies the position in the matrix of elements</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
 <!-- ==================== NAVIGATION BAR ==================== -->
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">

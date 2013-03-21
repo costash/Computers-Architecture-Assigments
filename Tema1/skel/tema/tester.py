@@ -143,12 +143,10 @@ class Tester:
 
         tasks = test.tasks
         threads = []
-        for i in range(len(tasks)):
-            task = tasks[i]
+        for task in tasks:
             if len(task) != 5: 
                 break
             index = task[0][0] * n + task[0][1]
-            #self.start_node(nodes[index], task)
             t = Thread(target=Tester.start_node, args=(self, nodes[index], task, test))
             checker.add_banned_thread(t)
             
@@ -159,12 +157,8 @@ class Tester:
         for t in threads:
             t.join()
 
-        print "Before shutdwn"
         for node in nodes:
             node.shutdown()
-            print node.node_ID
-        print "After shutdwn"
-        
         
         errors = checker.status()
         for error in errors:
@@ -410,8 +404,6 @@ class TestGenerator:
         """
         mat_dim = int(math.sqrt(num_nodes)) * stored_block_size
         tasks = []
-        i = 0
-        j = 0
         n = mat_dim / stored_block_size 
         for k in range(num_tasks):
             num_rows_block = self.rand_gen.randrange(3, 5, 1)
@@ -420,9 +412,10 @@ class TestGenerator:
             start_col = self.rand_gen.randrange(0, mat_dim-num_cols_block)
             
             # assign random nodes to task
-            if k <= num_nodes: #each node has at least one task
-                i = (i+1)%n
-                j = (j+1)%n
+            if k < num_nodes: #each node has at least one task
+                i = k/n
+                j = k%n
+                if DEBUG: print "(%d, %d)"%(i,j)
             else: 
                 i = self.rand_gen.randrange(0, n)
                 j = self.rand_gen.randrange(0, n)
