@@ -42,8 +42,9 @@ class Tester:
         self.test_generator = TestGenerator()    
         
         self.print_lock = Lock()
-        self.passed = Event()
+        self.correct_results_lock = Lock()
         self.passed_tests = 0
+        self.num_correct_results = 0
         self.finished_output_lock = Lock()
         self.finished_output = False       
  
@@ -105,6 +106,9 @@ class Tester:
 
         checker = Checker() 
         checker.add_banned_thread(current_thread())
+        
+        self.num_correct_results = 0
+        
         num_nodes = test.num_nodes
         matrix_size = len(test.matrix1)
         block_size = test.get_stored_block_dim()
@@ -143,10 +147,12 @@ class Tester:
 
         tasks = test.tasks
         threads = []
-        for task in tasks:
+        for i in range(len(tasks)):
+            task = tasks[i]
             if len(task) != 5: 
                 break
             index = task[0][0] * n + task[0][1]
+            #self.start_node(nodes[index], task)
             t = Thread(target=Tester.start_node, args=(self, nodes[index], task, test))
             checker.add_banned_thread(t)
             
@@ -164,11 +170,11 @@ class Tester:
         for error in errors:
             self.print_error(error)
 
-        if not len(errors) and self.passed.is_set():
+        if not len(errors) and self.num_correct_results == len(tasks):
             self.passed_tests += 1
             self.safe_print("Correct result")
         
-        self.safe_print("**************** End Test %s *******************\n" % test.name)
+        self.safe_print(("**************** End Test %s *******************\n" % test.name) + ("Remaining threads: %d" % active_count()))
 
                         
     def start_node(self, node, task, test):
@@ -189,7 +195,9 @@ class Tester:
         if err:
             self.print_error(err)
         else:
-            self.passed.set()
+            with self.correct_results_lock:
+                self.num_correct_results +=1
+            
             
     def check_result(self, result_block, matrix1, matrix2, task):
         """
@@ -404,6 +412,8 @@ class TestGenerator:
         """
         mat_dim = int(math.sqrt(num_nodes)) * stored_block_size
         tasks = []
+        i = 0
+        j = 0
         n = mat_dim / stored_block_size 
         for k in range(num_tasks):
             num_rows_block = self.rand_gen.randrange(3, 5, 1)
@@ -412,10 +422,9 @@ class TestGenerator:
             start_col = self.rand_gen.randrange(0, mat_dim-num_cols_block)
             
             # assign random nodes to task
-            if k < num_nodes: #each node has at least one task
-                i = k/n
-                j = k%n
-                if DEBUG: print "(%d, %d)"%(i,j)
+            if k <= num_nodes: #each node has at least one task
+                i = (i+1)%n
+                j = (j+1)%n
             else: 
                 i = self.rand_gen.randrange(0, n)
                 j = self.rand_gen.randrange(0, n)
