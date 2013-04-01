@@ -3,6 +3,10 @@
 # C extensions
 *.so
 
+# Object files
+*.o
+*.obj
+
 # Temp files
 *~
 
@@ -36,3 +40,10 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Archive files
+*.zip
+*.rar
+
+# Eclipse metadata folder
+.metadata/*
