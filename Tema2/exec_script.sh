@@ -32,10 +32,15 @@ if test "$QUAD_MODULE" = "$ATLAS_PREFIX$QUAD"; then
 	MY_LIB=$QUAD_LIB
 fi
 
+# Cleanup tmp file
+rm -f tmp
+
+# Actual compiling and run
 if [[ $COMPILER="gcc" ]]; then
 	make clean && make VERSION=$MY_LIB
-	make run
+	
+	for test in *.mtx
+	do
+		make run TEST=$test
+	done
 fi
-
-# Cleanup
-rm -f tmp
