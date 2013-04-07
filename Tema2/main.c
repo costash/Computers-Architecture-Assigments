@@ -11,7 +11,7 @@
 
 
 #define EPS ((double)1.e-3)
-#define MAX_ULPS 262144
+#define MAX_ULPS 16048576
 
 #define FALSE 0
 #define TRUE 1
@@ -48,6 +48,27 @@ struct timeval get_time() {
  */
 inline int get_index(int i, int j, int size) {
 	return size * i + j;
+}
+
+double rand_double();
+
+/**
+ * Generate random square symmetric matrix of given size
+ */
+double *generate_matrix(int size) {
+	double *mat = calloc(size * size, sizeof(double));
+	int i, j;
+	for (i = 0; i < size; ++i) {
+		for (j = 0; j <= i; ++j) {
+			double num = rand_double();
+			int index = get_index(i, j, size);
+			mat[index] = num;
+			index = get_index(j, i, size);
+			mat[index] = num;
+		}
+	}
+
+	return mat;
 }
 
 /**
@@ -93,7 +114,7 @@ void print_matrix(double *mat, int size, FILE *file) {
 	int i, j;
 	for (i = 0; i < size; ++i) {
 		for (j = 0; j < size; ++j) {
-			fprintf(file, "%lg ", mat[get_index(i, j, size)]);
+			fprintf(file, "%2.14lg ", mat[get_index(i, j, size)]);
 		}
 		fprintf(file, "\n");
 	}
@@ -105,7 +126,7 @@ void print_matrix(double *mat, int size, FILE *file) {
 void print_array(double *array, int size, FILE *file) {
 	int i;
 	for (i = 0; i < size; ++i)
-		fprintf(file, "%lg ", array[i]);
+		fprintf(file, "%2.14lg ", array[i]);
 	fprintf(file, "\n");
 }
 
@@ -153,7 +174,7 @@ int almost_equal_2s_omplement(double a, double b, int max_ulps)
 {
     // Make sure maxUlps is non-negative and small enough that the
     // default NAN won't compare as equal to anything.
-    assert(max_ulps > 0 && max_ulps < 4 * 1024 * 1024);
+    assert(max_ulps > 0 && max_ulps < 16 * 1024 * 1024);
     long long a_int = *(long long*)&a;
     // Make aInt lexicographically ordered as a twos-complement int
     if (a_int < 0)
@@ -183,7 +204,7 @@ int arrays_double_equal(double *arr1, double *arr2, int size) {
 	int i;
 	for (i = 0; i < size; ++i) {
 		if (doubles_equal(arr1[i], arr2[i]) == FALSE) {
-			printf("Not equal: %2.14lg != %2.14lg at element %d\n", arr1[i], arr2[i], i);
+			fprintf(stderr, "Not equal: %2.14lg != %2.14lg at element %d\n", arr1[i], arr2[i], i);
 			return FALSE;
 		}
 	}
@@ -211,16 +232,16 @@ void dsymv_brute(const int size, const double alpha, const double *A,
 }
 
 /**
- * Executes the DSYMV operation, but optimized for caching
+ * Executes the DSYMV operation, but optimized with access only for half of
+ * the matrix using only pointers for matrix instead of indices
  */
 void dsymv_optimized(const int size, const double alpha, const double *A,
 		const double *x, const double beta, double *y) {
 	const double *p_elem = A;
 
-	double temp_alpha;
-	double accum;
-
-	double temp_elem;
+	register double temp_alpha;
+	register double accum;
+	register double temp_elem;
 
 	int i, j;
 
@@ -235,26 +256,57 @@ void dsymv_optimized(const int size, const double alpha, const double *A,
 
 		/* for i = [0, j) */
 		for (i = 0; i < j; ++i) {
-			temp_elem = (*(A + i));
+			temp_elem = (*(p_elem + i));
 			y[i] += temp_alpha * temp_elem;
 			accum += temp_elem * x[i];
 		}
-		temp_elem = (*(A + j));
+		temp_elem = (*(p_elem + j));
 		y[j] += temp_alpha * temp_elem + alpha * accum;
 
-		A += size;
+		p_elem += size;
 	}
-	/*
- 	    for (j = 1; j <= *n; ++j) {
-			temp1 = *alpha * X(j);
-			temp2 = 0.;
-			for (i = 1; i <= j-1; ++i) {
-				Y(i) += temp1 * A(i,j);
-				temp2 += A(i,j) * X(i);
-			}
-			Y(j) = Y(j) + temp1 * A(j,j) + *alpha * temp2;
-	    }
-	 */
+}
+
+/**
+ * Executes the DSYMV operation, using pointers only
+ */
+void dsymv_optimized_pointers(const int size, const double alpha, const double *A,
+		const double *x, const double beta, double *y) {
+	const double *p_elem = A;
+
+	register double temp_alpha;
+	register double accum;
+	register double temp_elem;
+
+	//int i, j;
+	double *pyi = y;
+	double *py_end = y + size;
+
+	for (; pyi != py_end; ++pyi) {
+		*pyi += beta * *pyi;
+	}
+
+	double *pyj = y;
+	const double *pxj = x;
+
+	const double *pxi;
+
+	const double *p_elem_j;
+
+	/* for j = [0, size) */
+	for (; pyj != py_end; ++pyj, ++pxj, p_elem += size) {
+		temp_alpha = alpha * *pxj;
+		accum = 0.;
+
+		/* for i = [0, j) */
+		for (pxi = x, pyi = y, p_elem_j = p_elem; pyi != pyj; ++pyi, ++pxi, ++p_elem_j) {
+			temp_elem = *p_elem_j;
+			*pyi += temp_alpha * temp_elem;
+			accum += temp_elem * *pxi;
+		}
+		temp_elem = *p_elem_j;
+		*pyj += temp_alpha * temp_elem + alpha * accum;
+	}
 }
 
 
@@ -269,20 +321,36 @@ int main(int argc, char* argv[]) {
 	double *y_optimized;
 	int SIZE;
 
-	srand(time(NULL));
+	srand(42);
 
-	if (argc != 2) {
+	if (argc < 2 && argc > 3) {
 		fprintf(stderr, "Usage: %s test_name\n", __FILE__);
 		exit(EXIT_FAILURE);
 	}
 
-	/* Load matrix A from file */
-	tv1 = get_time();
+	if (strcmp(argv[1], "RANDOM") != 0) {
+		/* Load matrix A from file */
+		tv1 = get_time();
 
-	load_matrix(&A, &SIZE, argv[1]);
+		load_matrix(&A, &SIZE, argv[1]);
 
-	tv2 = get_time();
-	printf("Loaded matrix of size %d in %lf miliseconds\n", SIZE, get_elapsed_time_milisec(&tv1, &tv2));
+		tv2 = get_time();
+		//printf("Loaded matrix of size %d in %lf miliseconds\n", SIZE, get_elapsed_time_milisec(&tv1, &tv2));
+		printf("Running test %s of size %d\n", argv[1], SIZE);
+		printf("Loaded matrix in %lf miliseconds\n", get_elapsed_time_milisec(&tv1, &tv2));
+	}
+	else {
+		/* Generate random symmetric matrix of size given by argv[2] */
+		SIZE = atoi(argv[2]);
+		assert(SIZE > 0 && SIZE < 100000);
+		tv1 = get_time();
+
+		A = generate_matrix(SIZE);
+
+		tv2 = get_time();
+		printf("Running test %s of size %d\n", argv[1], SIZE);
+		printf("Generated matrix in %lf miliseconds\n", get_elapsed_time_milisec(&tv1, &tv2));
+	}
 
 	/* Generate arrays x, y and scalars alpha and beta */
 	tv1 = get_time();
@@ -300,7 +368,8 @@ int main(int argc, char* argv[]) {
 	memcpy(y_optimized, y_generated, SIZE * sizeof(double));
 
 	tv2 = get_time();
-	printf("Generated arrays x and y of size %d in %lf miliseconds\n", SIZE, get_elapsed_time_milisec(&tv1, &tv2));
+	//printf("Generated arrays x and y of size %d in %lf miliseconds\n", SIZE, get_elapsed_time_milisec(&tv1, &tv2));
+	printf("Generated arrays in %lf miliseconds\n", get_elapsed_time_milisec(&tv1, &tv2));
 
 	//print_matrix(A, SIZE, stdout);
 
@@ -310,7 +379,7 @@ int main(int argc, char* argv[]) {
 	dsymv_brute(SIZE, alpha, A, x, beta, y_brute);
 
 	tv2 = get_time();
-	printf("Computed dsymv brute of size %d in %lf miliseconds\n", SIZE, get_elapsed_time_milisec(&tv1, &tv2));
+	printf("dsymv_brute in %lf miliseconds\n", get_elapsed_time_milisec(&tv1, &tv2));
 	fflush(stdout);
 
 	//print_array(y_brute, SIZE, stdout);
@@ -318,12 +387,12 @@ int main(int argc, char* argv[]) {
 	/* Generate arrays x, y and scalars alpha and beta */
 	tv1 = get_time();
 
-	dsymv_optimized(SIZE, alpha, A, x, beta, y_optimized);
+	dsymv_optimized_pointers(SIZE, alpha, A, x, beta, y_optimized);
 
 	//print_array(y_optimized, SIZE, stdout);
 
 	tv2 = get_time();
-	printf("Computed dsymv optimized of size %d in %lf miliseconds\n", SIZE, get_elapsed_time_milisec(&tv1, &tv2));
+	printf("dsymv_optimized in %lf miliseconds\n", get_elapsed_time_milisec(&tv1, &tv2));
 	fflush(stdout);
 
 	/* Execute BLAS implementation */
@@ -340,26 +409,28 @@ int main(int argc, char* argv[]) {
 			y_blas,
 			1);
 	tv2 = get_time();
-	printf("Computed dsymv with BLAS of size %d in %lf miliseconds\n", SIZE, get_elapsed_time_milisec(&tv1, &tv2));
+	printf("dsymv_BLAS in %lf miliseconds\n", get_elapsed_time_milisec(&tv1, &tv2));
 	fflush(stdout);
 
 	int equal = arrays_double_equal(y_brute, y_blas, SIZE);
-	printf("Results are %s\n", equal == TRUE? "Equal" : "Not equal");
+	fprintf(stdout, "Results are %s\n", equal == TRUE? "Equal" : "Not equal");
 
 	if (!equal) {
-		printf("Brute array:\n");
-		print_array(y_brute, SIZE, stdout);
-		printf("Blas array:\n");
-		print_array(y_blas, SIZE, stdout);
+		fprintf(stderr, "Test %s failed\n", argv[1]);
+		fprintf(stderr, "Brute array:\n");
+		print_array(y_brute, SIZE, stderr);
+		fprintf(stderr, "Blas array:\n");
+		print_array(y_blas, SIZE, stderr);
 	}
 
 	equal = arrays_double_equal(y_optimized, y_blas, SIZE);
-	printf("Results are %s\n", equal == TRUE? "Equal" : "Not equal");
+	fprintf(stdout, "Results are %s\n", equal == TRUE? "Equal" : "Not equal");
 	if (!equal) {
-		printf("Optimized array:\n");
-		print_array(y_optimized, SIZE, stdout);
-		printf("Blas array:\n");
-		print_array(y_blas, SIZE, stdout);
+		fprintf(stderr, "Test %s failed\n", argv[1]);
+		fprintf(stderr, "Optimized array:\n");
+		print_array(y_optimized, SIZE, stderr);
+		fprintf(stderr, "Blas array:\n");
+		print_array(y_blas, SIZE, stderr);
 	}
 
 	free(A);
