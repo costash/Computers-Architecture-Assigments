@@ -1,0 +1,12 @@
+# opteron optimized with no optimization flags
+# Time			Size		Test-Name
+0.010000		48			bcsstk01.mtx
+130.064000		5357		s3rmt3m3.mtx
+541.353000		10974		bcsstk17.mtx
+639.781000		11948		bcsstk18.mtx
+1016.314000		15000		RANDOM_15000
+1080.393000		15439		bcsstk25.mtx
+1364.788000		17281		e40r0000.mtx
+1581.045000		18000		RANDOM_18000
+1956.927000		20000		RANDOM_20000
+7960.829000		40000		RANDOM_40000

@@ -1,0 +1,180 @@
+./tema2 bcsstk01.mtx 
+Running test bcsstk01.mtx of size 48
+Loaded matrix in 6.781000 miliseconds
+Generated arrays in 0.006000 miliseconds
+dsymv_brute in 0.028000 miliseconds
+dsymv_optimized in 0.010000 miliseconds
+dsymv_BLAS in 0.021000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 bcsstk17.mtx 
+Running test bcsstk17.mtx of size 10974
+Loaded matrix in 450.929000 miliseconds
+Generated arrays in 1.008000 miliseconds
+dsymv_brute in 1454.547000 miliseconds
+dsymv_optimized in 541.353000 miliseconds
+dsymv_BLAS in 167.263000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 bcsstk18.mtx 
+Running test bcsstk18.mtx of size 11948
+Loaded matrix in 396.025000 miliseconds
+Generated arrays in 1.137000 miliseconds
+dsymv_brute in 1719.480000 miliseconds
+dsymv_optimized in 639.781000 miliseconds
+dsymv_BLAS in 197.594000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 bcsstk25.mtx 
+Running test bcsstk25.mtx of size 15439
+Loaded matrix in 651.294000 miliseconds
+Generated arrays in 1.411000 miliseconds
+dsymv_brute in 2886.096000 miliseconds
+dsymv_optimized in 1080.393000 miliseconds
+dsymv_BLAS in 322.431000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 e40r0000.mtx 
+Running test e40r0000.mtx of size 17281
+Loaded matrix in 1129.658000 miliseconds
+Generated arrays in 1.540000 miliseconds
+dsymv_brute in 3603.401000 miliseconds
+dsymv_optimized in 1364.788000 miliseconds
+dsymv_BLAS in 403.317000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 s3rmt3m3.mtx 
+Running test s3rmt3m3.mtx of size 5357
+Loaded matrix in 221.994000 miliseconds
+Generated arrays in 0.491000 miliseconds
+dsymv_brute in 348.673000 miliseconds
+dsymv_optimized in 130.064000 miliseconds
+dsymv_BLAS in 39.903000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 15000
+Running test RANDOM of size 15000
+Generated matrix in 7966.776000 miliseconds
+Generated arrays in 1.436000 miliseconds
+dsymv_brute in 2729.642000 miliseconds
+dsymv_optimized in 1016.314000 miliseconds
+dsymv_BLAS in 309.083000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 18000
+Running test RANDOM of size 18000
+Generated matrix in 12193.743000 miliseconds
+Generated arrays in 1.955000 miliseconds
+dsymv_brute in 3911.269000 miliseconds
+dsymv_optimized in 1581.045000 miliseconds
+dsymv_BLAS in 444.632000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 20000
+Running test RANDOM of size 20000
+Generated matrix in 14134.113000 miliseconds
+Generated arrays in 2.083000 miliseconds
+dsymv_brute in 4811.236000 miliseconds
+dsymv_optimized in 1956.927000 miliseconds
+dsymv_BLAS in 547.988000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 40000
+Running test RANDOM of size 40000
+Generated matrix in 125682.481000 miliseconds
+Generated arrays in 3.816000 miliseconds
+dsymv_brute in 19523.603000 miliseconds
+dsymv_optimized in 7960.829000 miliseconds
+dsymv_BLAS in 2400.739000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 bcsstk01.mtx 
+Running test bcsstk01.mtx of size 48
+Loaded matrix in 0.586000 miliseconds
+Generated arrays in 0.005000 miliseconds
+dsymv_brute in 0.004000 miliseconds
+dsymv_optimized in 0.022000 miliseconds
+dsymv_BLAS in 0.012000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 bcsstk17.mtx 
+Running test bcsstk17.mtx of size 10974
+Loaded matrix in 523.022000 miliseconds
+Generated arrays in 0.706000 miliseconds
+dsymv_brute in 273.083000 miliseconds
+dsymv_optimized in 167.884000 miliseconds
+dsymv_BLAS in 166.623000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 bcsstk18.mtx 
+Running test bcsstk18.mtx of size 11948
+Loaded matrix in 428.180000 miliseconds
+Generated arrays in 0.768000 miliseconds
+dsymv_brute in 322.197000 miliseconds
+dsymv_optimized in 198.816000 miliseconds
+dsymv_BLAS in 197.423000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 bcsstk25.mtx 
+Running test bcsstk25.mtx of size 15439
+Loaded matrix in 636.297000 miliseconds
+Generated arrays in 0.985000 miliseconds
+dsymv_brute in 536.430000 miliseconds
+dsymv_optimized in 331.720000 miliseconds
+dsymv_BLAS in 322.757000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 e40r0000.mtx 
+Running test e40r0000.mtx of size 17281
+Loaded matrix in 1077.616000 miliseconds
+Generated arrays in 1.094000 miliseconds
+dsymv_brute in 667.390000 miliseconds
+dsymv_optimized in 416.456000 miliseconds
+dsymv_BLAS in 400.719000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 s3rmt3m3.mtx 
+Running test s3rmt3m3.mtx of size 5357
+Loaded matrix in 585.390000 miliseconds
+Generated arrays in 0.328000 miliseconds
+dsymv_brute in 65.125000 miliseconds
+dsymv_optimized in 41.794000 miliseconds
+dsymv_BLAS in 39.985000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 15000
+Running test RANDOM of size 15000
+Generated matrix in 3784.853000 miliseconds
+Generated arrays in 1.366000 miliseconds
+dsymv_brute in 509.201000 miliseconds
+dsymv_optimized in 319.683000 miliseconds
+dsymv_BLAS in 315.225000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 18000
+Running test RANDOM of size 18000
+Generated matrix in 5691.465000 miliseconds
+Generated arrays in 1.544000 miliseconds
+dsymv_brute in 735.803000 miliseconds
+dsymv_optimized in 479.148000 miliseconds
+dsymv_BLAS in 497.792000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 20000
+Running test RANDOM of size 20000
+Generated matrix in 6888.081000 miliseconds
+Generated arrays in 1.729000 miliseconds
+dsymv_brute in 883.917000 miliseconds
+dsymv_optimized in 589.462000 miliseconds
+dsymv_BLAS in 548.512000 miliseconds
+Results are Equal
+Results are Equal
+./tema2 RANDOM 40000
+Running test RANDOM of size 40000
+Generated matrix in 68996.591000 miliseconds
+Generated arrays in 3.344000 miliseconds
+dsymv_brute in 3849.194000 miliseconds
+dsymv_optimized in 2528.984000 miliseconds
+dsymv_BLAS in 2411.256000 miliseconds
+Results are Equal
+Results are Equal

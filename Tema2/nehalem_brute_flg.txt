@@ -1,0 +1,12 @@
+# nehalem brute with optimization flags
+# Time			Size		Test-Name
+0.004000		48			bcsstk01.mtx
+33.796000		5357		s3rmt3m3.mtx
+140.081000		10974		bcsstk17.mtx
+165.546000		11948		bcsstk18.mtx
+262.569000		15000		RANDOM_15000
+276.279000		15439		bcsstk25.mtx
+347.240000		17281		e40r0000.mtx
+375.708000		18000		RANDOM_18000
+466.659000		20000		RANDOM_20000
+2016.088000		40000		RANDOM_40000
