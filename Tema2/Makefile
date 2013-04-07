@@ -8,8 +8,10 @@ CC = gcc
 ATLAS_DIR = /opt/tools/libraries/atlas
 VERSION = default
 TEST = default
+SIZE =
+OPTIMIZATION = -O0
 
-CFLAGS = -O0 -Wall -g
+CFLAGS = $(OPTIMIZATION) -Wall -g
 LDFLAGS = -L$(ATLAS_DIR)/$(VERSION)/lib -llapack -lf77blas -lcblas -latlas -lm
 #LDFLAGS = -lm
 TARGET = tema2
@@ -22,6 +24,6 @@ build: $(TARGET)
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $(OBJ) $(CFLAGS) $(LDFLAGS)
 run:
-	./$(TARGET) $(TEST)
+	./$(TARGET) $(TEST) $(SIZE)
 clean:
 	rm -rf $(TARGET) $(OBJ)
