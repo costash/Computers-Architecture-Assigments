@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# Author: Constantin Șerban-Rădoi 333CA
+# Tema 2 ASC
+# Aprilie 2013
+#
+# Script de execuție a testelor în coadă
+#
 
 [[ -z $COMPILER ]] && COMPILER="gcc"
 
@@ -18,8 +25,8 @@ NEHALEM_LIB="3.10.1-nehalem-gcc-4.4.6"
 OPTERON_LIB="3.10.1-opteron-gcc-4.4.6"
 QUAD_LIB="3.10.1-quad-gcc-4.4.6"
 
-MY_LIB=""
-OUT_FILE=""
+MY_LIB=""		# Lib to be loaded with gcc
+OUT_FILE=""		# Output file for test run
 
 if test "$NEHALEM_MODULE" = "$ATLAS_PREFIX$NEHALEM" ; then
 	MY_LIB=$NEHALEM_LIB
@@ -36,12 +43,11 @@ if test "$QUAD_MODULE" = "$ATLAS_PREFIX$QUAD"; then
 	OUT_FILE="out$QUAD"
 fi
 
-# Cleanup tmp file
+# Cleanup tmp file and output of the test run if exists
 rm -f tmp
-
 rm -f $OUT_FILE
 
-# define an array #
+# Array of sizes for random tests
 sizes=( 15000 18000 20000 40000 )
 
 # Actual compiling and run

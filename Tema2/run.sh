@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# Author: Heri
+# Author: Constantin Șerban-Rădoi 333CA
+# Tema 2 ASC
+# Aprilie 2013
 #
 # Script de submitere a job-urilor pe fiecare coda, folosind compilatoare diferite
 #
@@ -15,7 +17,7 @@ OPTERON_LIB="3.10.1-opteron-gcc-4.4.6"
 QUAD_LIB="3.10.1-quad-gcc-4.4.6"
 
 TEMP_FOLDER="temp_nehalem"
-# Create temp folder
+# Create temp folder for nehalem
 rm -rf $TEMP_FOLDER
 mkdir $TEMP_FOLDER
 chmod a+x $TEMP_FOLDER
@@ -29,7 +31,7 @@ mprun.sh --job-name MyTestGcc-N --queue ibm-nehalem.q \
 cd ..
 
 TEMP_FOLDER="temp_opteron"
-# Create temp folder
+# Create temp folder for opteron
 rm -rf $TEMP_FOLDER
 mkdir $TEMP_FOLDER
 chmod a+x $TEMP_FOLDER
@@ -42,7 +44,7 @@ mprun.sh --job-name MyTestGcc-O --queue ibm-opteron.q \
 cd ..
 
 TEMP_FOLDER="temp_quad"
-# Create temp folder
+# Create temp folder for quad
 rm -rf $TEMP_FOLDER
 mkdir $TEMP_FOLDER
 chmod a+x $TEMP_FOLDER

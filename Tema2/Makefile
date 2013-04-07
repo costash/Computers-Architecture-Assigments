@@ -1,7 +1,7 @@
 #
-# Author: Heri
-# 
-# CC = gcc
+# Author: Constantin Șerban-Rădoi 333CA
+# Tema 2 ASC
+# Aprilie 2013
 #
 CC = gcc
 
