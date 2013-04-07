@@ -13,6 +13,9 @@
 	- run.sh - script pentru submis joburile pe cozi
 	- exec_script.sh - fișierul executat pe noduri
 	- *.mtx - Fișiere de test ce conțin matrice în format Matrix-Market
+		Matrice folosite de pe matrix-market:
+			bcsstk01.mtx  bcsstk17.mtx  bcsstk18.mtx  bcsstk25.mtx
+			e40r0000.mtx  s3rmt3m3.mtx
 	- plots/*.png - Fișiere ce conțin plot-uri realizate cu gnuplot
 	- plots/*.txt - Fișiere ce conțin datele pentru crearea plot-urilor în
 		format gnuplot-friendly
