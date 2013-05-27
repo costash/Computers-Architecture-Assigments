@@ -1,0 +1,92 @@
+*** Constantin Șerban-Rădoi 333CA ***
+*** Tema 3 ASC ***
+*** Aprilie 2013 ***
+
+
+** Introducere **
+		Tema constă în scalarea unor stream-uri de imagini și crearea unui preview
+	cu astfel de thumbnail-uri.
+		Se dorește o implementare pe arhitectura Cell folosindu-ne de posibilitatea
+	de a folosi capabilitățile de paralelizare a acestei arhitecturi.
+
+** Implementare **
+Sincronizarea folosind mailbox-uri
+		Pentru a sincroniza PPU-ul cu SPU-urile, m-am folosit de mailbox-uri.
+	PPU-ul citește cadrul curent pentru toate stream-urile și apoi informează
+	SPU-urile printr-un mailbox că își pot începe treaba. SPU-urile aștteaptă
+	prin busy-waiting acest mesaj de la PPU și apoi începe prelucrarea.
+
+		După ce se termină procesarea etapei curente, toate SPU-urile trimit
+	un mesaj printr-un mailbox cu întrerupere către PPU, care așteaptă ca toate
+	SPU-urile să termine cadrul curent înainte să treacă mai departe.
+
+Transferurile DMA
+		Se face un transfer DMA inițial de la fiecare SPU, prin care se iau
+	informațiile despre locațiile de memorie ale diverselor structuri din PPU.
+		Apoi, pentru fiecare cadru, de procesat, iau în local store prin DMA
+	conținutul structurilor ce au informații despre imaginea curentă, și apoi
+	iau pe rând câte 4 linii din imagine și le procesez, rezultatul fiind trimis
+	înapoi printr-o serie de transferuri DMA, datorită problemelor de aliniament
+	și ale restricțiilor din cerința temei, de a nu folosi un memcpy suplimentar.
+		Pentru a evita acel memcpy suplimentar, am "spart" transferul DMA de
+	dimensiune (624 * 3 / 4) în 2 sau 4 transferuri, în funcție de locația din
+	imaginea finală a liniei procesate. Acest lucru duce la o scădere
+	semnificativă a performanței totuși. O altă metodă pentru evita acel memcpy
+	ar fi fost să procesez direct o linie din imaginea finală care accesa câte
+	4 imagini, în loc de o linie din imaginea inițială, scalată pe fiecare SPU.
+
+		În fine, overhead-ul nu este atât de mare, așa că nu am mai schimbat
+	implementarea.
+
+Vectorizări
+		Pentru vectorizare am luat practic câte 4 linii din imaginea inițială
+	și am făcut media element cu element pentru 2 câte 2 linii și apoi din nou
+	media pe rezultatele obținute anterior (folosind spu_avg).
+
+		O vectorizare pe coloane ar fi implicat o reordonare a memoriei prin
+	foarte multe shuffle-uri, și nici nu aș fi beneficiat de un plus foarte mare,
+	datorită faptului că aveam doar R, G și B și din 4 locații, una era nefolosită.
+		Practic pe coloane am adunat element cu element ce am obținut în linia
+	calculată anterior din vectorizarea pe linii și din 4 în 4 pixeli am făcut
+	media lor.
+
+Timpi obținuți
+		Implementarea serială, la o rulare normală(cu un blade neîncărcat) durează
+	în jur de 10 secunde(total) din care aproximativ 4-5 secunde pentru scalare.
+		Implementarea paralelă, din ce am apucat să testez pe blade-uri, durează
+	cam 9-10 secunde(total), din care aproximativ 4 secunde pentru scalare.
+	Suspectez că acest timp se datorează încărcării blade-urilor, și că este
+	posibil ca la o rulare pe timpul nopții sau cândva când blade-urile nu sunt
+	încărcate va dura ceva mai puțin.
+		De exemplu, la momentul curent îmi este imposibil să fac o afirmație despre
+	timpii de rulare, deoarece tema ajunge să ruleze și în 20 de secunde (total)
+	respectiv 15 secunde (scalare) pe unul din blade-uri.
+
+		Pot spune că se obține un mic speed-up față de varianta serială doar
+	când blade-urile sunt libere.
+
+		Update: Pe Blade-ul 4 am reușit să rulez când nu era nimeni și am obținut:
+	Total: 6.37s
+	Scale: 0.89s
+		Pentru implementarea serială obțin timpi la ordinul 10s total, 4s scale.
+		De aici se poate observa un speed-up peste 4, datorită vectorizării pe
+	linii și al faptului că se procesează simultan imaginile.
+
+Feedback
+		Consider că tema nu este foarte utilă având în vedere că arhitectura
+	Cell este aproape moartă și nefolosită de nimeni. Mai mult, erorile provocate
+	de transferurile DMA sunt absolut neintuitive, și provoacă dureri de cap
+	datorită faptului că nu știi exact ce anume a provocat acele erori, programul
+	putând să moară în orice loc.
+		Aș fi preferat să studiem arhitecturi precum CUDA ce folosesc instrucțiuni
+	SIMD într-un mod mult mai eficient și este mult mai ușor de scris cod pe
+	aceste arhitecturi.
+
+Timp rezolvare
+		Estimez că pentru rezolvarea temei am avut nevoie de peste 35 de ore efective
+	de lucru (adică vreo 4-5 zile a câte 8 ore pe zi), ceea ce nu este deloc ok
+	ținând cont de faptul că avem și alte teme, plus însăși prezența la facultate.
+		Sugerez să schimbați pe viitor acest gen de teme și însăși arhitectura
+	studiată, deoarece nu mai este folosită de aproape nimeni. De exemplu, consola
+	Sony Play Station ce va apărea va trece pe arhitecturi X86, și practic PS3
+	va rămâne deja istorie cu CELL-ul lui.

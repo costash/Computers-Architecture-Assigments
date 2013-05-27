@@ -1,0 +1,56 @@
+*** Tema 4 ASC ***
+*** Constantin Șerban-Rădoi 333CA ***
+*** Mai 2013 ***
+
+Tema constă în implementarea unui preview-er pentru platforma Cell.
+
+** Detalii implementare **
+* Taskul 1 - Optimizarea prin transferul a 2 linii *
+	Pentru acest task am pornit de la implementarea simplă, cu o singură linie
+	și am dublat dimensiunea bufferelor respectiv a transferurilor. Pentru
+	transfer-urile de put, care se fac linie cu linie, aștept doar după ce-am
+	făcut cele două put-uri, pentru a limita overhead-ul transfer-urilor.
+
+* Taskul 2 - Double buffering *
+	Pentru acest task, am folosit vectori de buffere ce conțin câte 2 buffere
+	de dimensiune 4 linii. Primul buffer este transferat inițial în afara buclei,
+	apoi se transferă la începutul buclei următorul buffer și se face wait pe primul.
+	Astfe, în timp ce se prelucrează primul buffer, al 2-lea este transferat, iar
+	la pasul următor avem deja datele încărcate. Pentru ultimul buffer, fac
+	din nou procesarea din buclă, separat, în afara acesteia, după ce s-a terminat.
+
+* Taskul 3 - Liste DMA *
+	Pentru acest task am folosit buffere de dimensiune 32 de linii. Pentru a
+	lua din memoria principală, am împărțit transferurile în 4 elemente a câte
+	8 linii, pe care le-am transferat cu ajutorul funcției mfc_getl.
+	Pentru punerea datelor înapoi pe PPU, am renunțat să folosesc liste DMA,
+	deoarece s-au dovedit a fi mai lente decât dacă foloseam mfc_put simplu, de
+	8 ori, cu un wait la final.
+
+** Timpi obținuți pentru scalare (secunde) **
+0)				SIMPLE		2_LINES		DOUBLE_BUF		DMA_LISTS
+1) NR_SPUS = 1:	2.094		2.070		1.554			2.005
+2) NR_SPUS = 2:	1.111		1.090		0.817			1.036
+3) NR_SPUS = 4:	0.611		0.596		0.465			0.552
+4) NR_SPUS = 8:	0.346		0.335		0.261			0.305
+
+	Nu știu de unde ați scos speed-up-urile din enunț, însă pentru 2_LINES orice
+	metodă am încercat, fie era mai slabă, fie la o diferență foarte mică față
+	de varianta simplă.
+	
+	La fel și la implementarea cu liste DMA, dacă foloseam liste și pentru put
+	ajungeam la timpi similari cu cei de la SIMPLE. Singura variantă cât de cât
+	ok este cea în care folosesc liste doar pentru GET.
+	
+	Mi s-ar fi părut normal să fie speed-up mare la Double Buffering, cum se vede
+	și în timpii mei, unde am timpi cu aproximativ 25% mai buni.
+
+** Penalizare timp **
+	Sper să nu mi se scadă pe întârziere că am trimis cu o oră după 23:55, pentru
+	că am stat să scot timpi rezonabili de pe blade-uri, care erau relativ încărcate.
+
+
+** Feedback **
+	Ca și la tema precedentă, țin să menționez că tema aceasta nu mi-a plăcut.
+	Este anormal să studiem o platformă care nu se mai folosește de aproape nimeni
+	și care practic nu are nici un viitor.

@@ -1,0 +1,16 @@
+# Temp files
+*~
+*.swp
+
+# Obj files
+*.obj
+*.o
+*.a
+*.d
+
+# Binaries
+ppu/paralel
+spu/paralel_spu
+
+# Results
+rez/*
